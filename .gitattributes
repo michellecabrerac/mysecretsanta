@@ -1,0 +1,24 @@
+# 1. Regla de oro: Normaliza todo a LF en el repo.
+# Git convertirá a CRLF en Windows solo para trabajar, pero subirá LF.
+* text=auto eol=lf
+
+# 2. Archivos de código y configuración (Forzar consistencia)
+*.java text diff=java
+*.xml text
+*.properties text
+*.md text
+*.gitignore text
+
+# 3. Scripts: Aquí es donde suelen ocurrir los errores de ejecución
+# Los scripts de shell (Linux/Mac) DEBEN ser LF para funcionar
+mvnw text eol=lf
+*.sh text eol=lf
+
+# Los scripts de Windows (batch/cmd) DEBEN ser CRLF para funcionar
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# 4. Binarios: Nunca tocar saltos de línea aquí (imágenes, ejecutables)
+*.jar binary
+*.png binary
+*.jpg binary
