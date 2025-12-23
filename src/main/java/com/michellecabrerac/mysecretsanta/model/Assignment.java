@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter @Setter
 @Entity
-public class Assigment {
+public class Assignment {
 /*Resultado del sorteo*/
     @ManyToOne
     private Draw draw;

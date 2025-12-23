@@ -1,15 +1,13 @@
 package com.michellecabrerac.mysecretsanta.model;
 
 import jakarta.annotation.Nullable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Getter @Setter
 @Entity
@@ -22,9 +20,13 @@ public class Draw {
     @Column(length = 1500)
     private String description;
     @Column(nullable = false, length = 20)
-    private DrawStatus status;
+    private DrawStatus status = DrawStatus.DRAFT;
     @OneToOne
     private DrawConfiguration configuration;
+    @OneToMany
+    private Set<DrawParticipant> participants;
+    @OneToMany
+    private Set<Assignment> assignments;
     @CreationTimestamp
     private LocalDateTime createdAt;
 }

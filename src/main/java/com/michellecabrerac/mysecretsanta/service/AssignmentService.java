@@ -1,4 +1,4 @@
 package com.michellecabrerac.mysecretsanta.service;
 
-public interface AssigmentService {
+public interface AssignmentService {
 }

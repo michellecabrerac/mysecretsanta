@@ -1,5 +1,6 @@
 package com.michellecabrerac.mysecretsanta.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
@@ -20,4 +21,12 @@ public class GroupMember {
     private User user;
     @CreationTimestamp
     private LocalDateTime joinedAt;
+    @Column(nullable = false, length = 20)
+    private GroupRole role = GroupRole.MEMBER;
+    @Column(nullable = false)
+    private Boolean active;
+}
+enum GroupRole{
+    ADMIN,
+    MEMBER
 }

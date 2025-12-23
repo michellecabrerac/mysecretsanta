@@ -1,7 +1,7 @@
 package com.michellecabrerac.mysecretsanta.repository;
 
-import com.michellecabrerac.mysecretsanta.model.Assigment;
+import com.michellecabrerac.mysecretsanta.model.Assignment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface IAssigmentRepository extends JpaRepository<Assigment, Long> {
+public interface IAssigmentRepository extends JpaRepository<Assignment, Long> {
 }
