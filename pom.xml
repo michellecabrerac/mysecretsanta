@@ -1,69 +1,142 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.1</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>3.4.1</version>
+		<relativePath/>
 	</parent>
 	<groupId>com.michellecabrerac</groupId>
 	<artifactId>mysecretsanta</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>mysecretsanta</name>
-	<description>Proyecto api para la gestión del amigo secreto</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
+	<description>Proyecto API para la gestión del amigo secreto</description>
 	<properties>
 		<java.version>21</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<mockito.version>5.14.2</mockito.version>
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
+
+		<!--Spring Boot Starter Validation
+            Añade validación de beans usando anotaciones:
+            - Hibernate Validator
+            - Jakarta Bean Validation API
+            - Permite usar @Valid, @NotNull, @Size, etc.-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webmvc</artifactId>
+			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
+		<!--Base de datos H2
+            Base de datos en memoria para desarrollo y pruebas:
+            - Rápida y ligera
+            - Solo disponible en runtime (no se compila con ella)
+            - Incluye consola web para ver datos-->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
-			<scope>test</scope>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope> <!-- Solo se necesita cuando la aplicación se ejecuta -->
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webmvc-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<!-- Lombok -->
+
+		<!--Lombok
+            Reduce código boilerplate mediante anotaciones:
+            - @Getter/@Setter: genera getters y setters
+            - @Data: genera getters, setters, toString, equals, hashCode
+            - @Builder: patrón builder
+            - @NoArgsConstructor/@AllArgsConstructor: constructores
+            - optional=true: no es obligatorio para quien use tu librería-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
+
+		<!--Spring Boot Starter Test
+            Incluye todas las librerías para testing:
+            - JUnit 5 (Jupiter) para tests unitarios
+            - Mockito para mocks
+            - AssertJ para aserciones fluidas
+            - Spring Test & Spring Boot Test
+            - Solo disponible en scope test (no se incluye en el JAR final)-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope> <!-- Solo para pruebas, no en producción -->
+		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
+			<!--Plugin de Spring Boot para Maven
+                Empaqueta la aplicación como un JAR ejecutable y gestiona el ciclo de vida-->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<!--Excluye Lombok del JAR final
+                        Lombok solo es necesario en tiempo de compilación,
+                        no en runtime ya que genera el código durante la compilación-->
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+
+			<!--Maven Dependency Plugin
+                Proporciona información sobre las dependencias del proyecto-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>get-agent-path</id>
+						<!--Se ejecuta en la fase 'initialize' (primera fase del ciclo de vida)
+                            para que las propiedades estén disponibles para otros plugins-->
+						<phase>initialize</phase>
+						<goals>
+							<!--Goal 'properties': hace que las rutas de las dependencias
+                                estén disponibles como propiedades Maven-->
+							<goal>properties</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!--Maven Surefire Plugin
+                Ejecuta los tests unitarios durante la fase 'test' del build-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.5.2</version>
+				<configuration>
+					<argLine>
+						<!---javaagent: carga el agente de Mockito al iniciar la JVM
+                            	Esto permite que Mockito funcione correctamente con Java 21
+                            	sin mostrar warnings sobre carga dinámica de agentes-->
+						-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
+						<!--Habilita la carga dinámica de agentes en la JVM
+								Necesario para compatibilidad con versiones futuras de Java
+								Evita warnings sobre carga dinámica de ByteBuddy-->
+						-XX:+EnableDynamicAgentLoading
+					</argLine>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
