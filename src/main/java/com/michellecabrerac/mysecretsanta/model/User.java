@@ -1,13 +1,15 @@
 package com.michellecabrerac.mysecretsanta.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 public class User {
     @Id
