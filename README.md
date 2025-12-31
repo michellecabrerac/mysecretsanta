@@ -83,3 +83,94 @@ com.michellecabrerac.mysecretsanta/
 - **UC-06:** Transiciones de Estado del Sorteo  
 - **UC-07:** Ejecución del Sorteo y Generación de Asignaciones  
 - **UC-08:** Revelación de Asignaciones  
+
+---
+
+## 📐 Commit Convention
+
+Este proyecto seguirá una convención de commits clara y explícita para mantener un historial **legible y trazable**.
+
+---
+
+### 📌 Formato
+```
+<TYPE>: <description>
+```
+---
+### 🧩 Tipos de Commit
+
+**UC-XX:** Funcionalidad de negocio
+Relacionado con un caso de uso específico. Incluye implementación y tests.
+
+**Ejemplos:**
+```
+UC-01: implement createUser method with business validations and tests
+UC-01: implement getUserById with error handling
+UC-01: complete user management use case
+```
+---
+
+**Refactor:** Reestructuración de código
+Cambios que mejoran el código sin alterar su comportamiento.
+
+**Ejemplos:**
+```
+Refactor: standardize repository naming convention
+Refactor: improve entity definitions
+Refactor: extract validation logic to separate methods
+````
+---
+
+**Fix:** Corrección de errores
+Corrección de bugs o errores detectados.
+
+**Ejemplos:**
+```
+Fix: resolve Mockito warnings
+Fix: correct email validation logic
+Fix: adjust POM configuration for Java 21 compatibility
+```
+
+---
+
+**Docs:** Documentación
+Cambios en documentación (README, Javadoc, comentarios).
+
+**Ejemplos:**
+```
+Docs: add README with project overview
+Docs: document API endpoints in OpenAPI
+Docs: add commit convention guidelines
+```
+
+---
+
+**Test:** Tests independientes
+Cuando se añaden tests sin cambiar código de producción.
+
+**Ejemplos:**
+```
+Test: add integration tests for user repository
+Test: improve coverage for edge cases
+```
+
+---
+
+### 📏 Reglas
+
+- **Un commit = un cambio lógico**  
+  Cada commit debe representar una única razón para el cambio.
+
+- **Funcionalidad de negocio**  
+  Los commits `UC-XX:` deben incluir los tests correspondientes.
+
+- **Refactor ≠ funcionalidad**  
+  Los commits de tipo `Refactor` no deben incluir nueva funcionalidad.
+
+- **Descripción clara**  
+  El mensaje debe ser comprensible sin necesidad de ver el diff.
+
+- **Verbo en infinitivo**  
+  Usa `add`, `implement`, `fix`, no `added`, `implemented`.
+
+---
