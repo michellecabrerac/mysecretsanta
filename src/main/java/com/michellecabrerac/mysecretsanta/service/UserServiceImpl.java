@@ -52,4 +52,34 @@ public class UserServiceImpl implements UserService{
         }
     }
 
+    @Override
+    public User updateUser(Long id, String name, String surname) {
+        User user = getUserById(id);
+        if(name != null && !name.isBlank()){
+            user.setName(name);
+        }
+
+        user.setSurname(surname);
+
+        User updatedUser = userRepository.save(user);
+        return updatedUser;
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        //Validamos que el usuario existe
+        User user = getUserById(id);
+
+        //Validamos que no tenga participaciones activas y si las tiene lanzamos error
+        validateNoActiveParticipations(user);
+
+        //Eliminamos
+        userRepository.delete(user);
+    }
+
+    private void validateNoActiveParticipations(User user) {
+        //TODO add logic
+    }
+
+
 }

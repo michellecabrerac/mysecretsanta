@@ -4,6 +4,7 @@ import static org.mockito.Mockito.*;
 
 import com.michellecabrerac.mysecretsanta.exception.BusinessRuleException;
 import com.michellecabrerac.mysecretsanta.exception.DuplicateEmailException;
+import com.michellecabrerac.mysecretsanta.exception.UserNotFoundException;
 import com.michellecabrerac.mysecretsanta.model.User;
 import com.michellecabrerac.mysecretsanta.repository.UserRepository;
 import com.michellecabrerac.mysecretsanta.service.UserServiceImpl;
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,6 +25,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -43,6 +47,10 @@ Example: Confirming a status code is 'OK', checking if an item appears in a list
     private UserRepository userRepository;
     @InjectMocks
     private UserServiceImpl userService;
+
+    /*ArgumentCaptor nos permite capturar un argumento pasado a un método para inspeccionarlo*/
+    @Captor
+    private ArgumentCaptor<User> userCaptor;
 
     private User testUser;
     private static final String VALID_EMAIL = "test@gmail.com";
@@ -103,5 +111,30 @@ Example: Confirming a status code is 'OK', checking if an item appears in a list
         assertThatThrownBy(()-> userService.createUser(VALID_EMAIL, invalidName, SURNAME))
                 .isInstanceOf(BusinessRuleException.class);
         verifyNoInteractions(userRepository);
+    }
+    @Test
+    @DisplayName("Should update username and surname specifically")
+    void shouldUpdateUser_whenDataIsValid(){
+        Long userId = testUser.getId();
+        String updatedName = "Updated Name";
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+        //Mockito devuelve lo mismo que le acaban de pasar
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+        User result = userService.updateUser(userId, updatedName, null);
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+
+        assertThat(savedUser.getId()).isEqualTo(userId);
+        assertThat(savedUser.getName()).isEqualTo(updatedName);
+        assertThat(savedUser.getSurname()).isNull();
+    }
+    @Test
+    @DisplayName("Should return UserNotFoundException when the user doesn't exist on delete")
+    void shouldThrowUserNotFoundException_whenDeletingNonExitingUser(){
+        Long inventedId = 999999L;
+        when(userRepository.findById(inventedId)).thenReturn(Optional.empty());
+        assertThatThrownBy(()-> userService.deleteUser(inventedId)).isInstanceOf(UserNotFoundException.class);
+        verify(userRepository, never()).delete(any());
     }
 }
