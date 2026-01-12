@@ -19,7 +19,7 @@ public class User {
     private String email;
     @Column(nullable = false, length = 100)
     private String name;
-    @Column(length = 100)
+    @Column(nullable = false, length = 100)
     private String surname;
     @CreationTimestamp
     private LocalDateTime createdAt;
