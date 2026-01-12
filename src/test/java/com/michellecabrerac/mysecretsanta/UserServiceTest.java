@@ -8,16 +8,13 @@ import com.michellecabrerac.mysecretsanta.exception.UserNotFoundException;
 import com.michellecabrerac.mysecretsanta.model.User;
 import com.michellecabrerac.mysecretsanta.repository.UserRepository;
 import com.michellecabrerac.mysecretsanta.service.UserServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -31,15 +28,15 @@ import java.util.Optional;
 public class UserServiceTest {
 
 /*The AAA Pattern Explained
-Arrange: Prepare the test environment.
+Arrange (Preparación): Prepare the test environment.
 Initialize objects, create test data, set up variables, and configure dependencies.
 Example: Creating a user account, loading a list of items.
 
-Act: Perform the action you want to test.
+Act (Acción): Perform the action you want to test.
 Call the method or function you are testing (the System Under Test or SUT).
 Example: Submitting a form, calling a calculation function, logging in.
 
-Assert: Verify the outcome.
+Assert (Verificación): Verify the outcome.
 Check if the actual result matches the expected result using assertion methods.
 Example: Confirming a status code is 'OK', checking if an item appears in a list, verifying a calculation is correct.
 * */
@@ -57,32 +54,52 @@ Example: Confirming a status code is 'OK', checking if an item appears in a list
     private static final String NAME = "Test Name";
     private static final String SURNAME = "Test Surname";
 
-    @BeforeEach
-    void setUp(){
+    @Test
+    @DisplayName("Should throw a exception when id of user does not exist")
+    void shouldThrowUserNotFoundException_whenTheUserIdIsNotFound(){
+        Long nonExistingId = -1L;
+        when(userRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+        assertThatThrownBy(()-> userService.getUserById(nonExistingId))
+                .isInstanceOf(UserNotFoundException.class);
+
+        verify(userRepository).findById(nonExistingId);
+    }
+    @Test
+    @DisplayName("Should throw a UserNotFoundException when user email does not exist")
+    void shouldThrowUserNotFoundException_whenEmailNotFound(){
+        String nonExistingEmail = "nonExistingEmail@mail.com";
+        when(userRepository.findByEmail(nonExistingEmail)).thenReturn(Optional.empty());
+        assertThatThrownBy(()-> userService.getUserByEmail(nonExistingEmail))
+                .isInstanceOf(UserNotFoundException.class);
+        verify(userRepository, atLeastOnce()).findByEmail(nonExistingEmail);
+    }
+    /*Test creación*/
+    @Test
+    @DisplayName("Should return a created user when data entered is valid")
+    void shouldReturnCreatedUser_whenDataIsValid(){ //should_<expected>_when_<condition>
         testUser = User.builder()
                 .id(1L)
                 .email(VALID_EMAIL)
                 .name(NAME)
                 .surname(SURNAME)
                 .createdAt(LocalDateTime.now()).build();
-    }
-    /*Test creación*/
-    @Test
-    @DisplayName("Should return a created user when data entered is valid")
-    void shouldReturnCreatedUser_whenDataIsValid(){ //should_<expected>_when_<condition>
         //Arrange
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
+        when(userRepository.save(any(User.class))).then(AdditionalAnswers.returnsFirstArg());
         //Act
         User result = userService.createUser(VALID_EMAIL, NAME, SURNAME);
         //Assert
+        verify(userRepository).save(userCaptor.capture());
+        User capturedUser = userCaptor.getValue();
+
         assertThat(result).isNotNull();
-        assertThat(result.getEmail()).isEqualTo(VALID_EMAIL);
-        assertThat(result.getName()).isEqualTo(NAME);
-        assertThat(result.getSurname()).isEqualTo(SURNAME);
 
-        verify(userRepository).save(any(User.class));
-
+        //Validación agrupada -> reporta todos los fallos a la vez
+        assertThat(capturedUser).satisfies( user -> {
+                    assertThat(user.getEmail()).isEqualTo(VALID_EMAIL);
+                    assertThat(user.getName()).isEqualTo(NAME);
+                    assertThat(user.getSurname()).isEqualTo(SURNAME);
+        });
     }
     @Test
     @DisplayName("Should throw a DuplicatedEmailException when the email already exists")
@@ -96,11 +113,11 @@ Example: Confirming a status code is 'OK', checking if an item appears in a list
     }
     @ParameterizedTest
     @NullAndEmptySource
-    @DisplayName("Should throw a BusinessRuleException when the email is null or empty")
+   // @ValueSource(strings = {"email.com", "@gmail.com", "email@email@.com"})
+    @DisplayName("Should throw a BusinessRuleException when the email is invalid")
     void shouldThrowBusinessRuleException_whenEmailIsNullOrEmpty(String invalidEmail){
         assertThatThrownBy(()-> userService.createUser(invalidEmail, NAME, SURNAME))
                 .isInstanceOf(BusinessRuleException.class);
-        //verify(userRepository, never()).save(any(User.class));
         verifyNoInteractions(userRepository);
     }
 
@@ -113,21 +130,35 @@ Example: Confirming a status code is 'OK', checking if an item appears in a list
         verifyNoInteractions(userRepository);
     }
     @Test
-    @DisplayName("Should update username and surname specifically")
+    @DisplayName("Should update user fields correctly based on input values")
     void shouldUpdateUser_whenDataIsValid(){
-        Long userId = testUser.getId();
+        Long userId = 1L;
+
+        testUser = User.builder()
+                        .id(userId)
+                        .email(VALID_EMAIL)
+                        .name(NAME)
+                        .surname(SURNAME)
+                        .createdAt(LocalDateTime.now()).build();
+
         String updatedName = "Updated Name";
+        String updatedSurname = "Updated Surname";
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
         //Mockito devuelve lo mismo que le acaban de pasar
-        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userRepository.save(any(User.class))).then(AdditionalAnswers.returnsFirstArg());
 
-        User result = userService.updateUser(userId, updatedName, null);
+        User result = userService.updateUser(userId, updatedName, updatedSurname);
+
         verify(userRepository).save(userCaptor.capture());
-        User savedUser = userCaptor.getValue();
+        User capturedUser = userCaptor.getValue();
 
-        assertThat(savedUser.getId()).isEqualTo(userId);
-        assertThat(savedUser.getName()).isEqualTo(updatedName);
-        assertThat(savedUser.getSurname()).isNull();
+        assertThat(result).isNotNull();
+        assertThat(capturedUser).satisfies(user -> {
+            assertThat(user.getId()).isEqualTo(userId);
+            assertThat(user.getName()).isEqualTo(updatedName);
+            assertThat(user.getSurname()).isEqualTo(updatedSurname);
+        });
+
     }
     @Test
     @DisplayName("Should return UserNotFoundException when the user doesn't exist on delete")
