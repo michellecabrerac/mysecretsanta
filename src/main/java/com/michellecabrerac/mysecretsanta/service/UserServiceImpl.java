@@ -58,8 +58,9 @@ public class UserServiceImpl implements UserService{
         if(name != null && !name.isBlank()){
             user.setName(name);
         }
-
-        user.setSurname(surname);
+        if(surname != null && !surname.isBlank()){
+            user.setSurname(surname);
+        }
 
         User updatedUser = userRepository.save(user);
         return updatedUser;
