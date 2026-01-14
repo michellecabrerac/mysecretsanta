@@ -9,12 +9,16 @@ import java.time.LocalDateTime;
 
 @Getter @Setter
 @Entity
+@Table(name = "T_DRAW_PARTICIPANT")
 public class DrawParticipant {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "draw_fk", nullable = false)
     private Draw draw;
     @ManyToOne
+    @JoinColumn(name = "user_fk", nullable = false)
     private User user;
     @CreationTimestamp
     private LocalDateTime registeredAt;

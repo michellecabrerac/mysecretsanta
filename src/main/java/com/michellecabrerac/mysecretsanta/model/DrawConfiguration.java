@@ -8,8 +8,10 @@ import java.time.LocalDate;
 import java.util.Date;
 @Getter @Setter
 @Entity
+@Table(name = "T_DRAW_CONFIGURATION")
 public class DrawConfiguration {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column
     private Boolean allowRepeatedPairsLastYear;
@@ -19,8 +21,8 @@ public class DrawConfiguration {
     private Float maxGiftPrice;
     @Column(nullable = false)
     private Date drawDate;
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "configuration" , fetch = FetchType.LAZY)
     private Draw draw;
     @Column
-    private LocalDate evenDate;
+    private LocalDate eventDate;
 }
