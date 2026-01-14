@@ -11,9 +11,11 @@ import java.util.Set;
 
 @Getter @Setter
 @Entity
+@Table(name = "T_DRAW")
 public class Draw {
     /*Participación sorteo*/
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false, length = 100)
     private String name;
@@ -22,10 +24,11 @@ public class Draw {
     @Column(nullable = false, length = 20)
     private DrawStatus status = DrawStatus.DRAFT;
     @OneToOne
+    @JoinColumn(name = "configuration_fk", nullable = false)
     private DrawConfiguration configuration;
-    @OneToMany
+    @OneToMany(mappedBy = "draw")
     private Set<DrawParticipant> participants;
-    @OneToMany
+    @OneToMany(mappedBy = "draw")
     private Set<Assignment> assignments;
     @CreationTimestamp
     private LocalDateTime createdAt;
