@@ -1,12 +1,13 @@
 package com.michellecabrerac.mysecretsanta.service;
-
 import com.michellecabrerac.mysecretsanta.exception.BusinessRuleException;
 import com.michellecabrerac.mysecretsanta.exception.DuplicateEmailException;
 import com.michellecabrerac.mysecretsanta.exception.UserNotFoundException;
 import com.michellecabrerac.mysecretsanta.model.User;
 import com.michellecabrerac.mysecretsanta.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class UserServiceImpl implements UserService{
     @Autowired
     private UserRepository userRepository;
